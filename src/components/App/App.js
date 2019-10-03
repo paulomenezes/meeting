@@ -10,11 +10,11 @@ class App extends Component {
     meetingNameError: false,
   };
 
-  // componentDidMount() {
-  //   FirebaseService.getDataList('leituras', dataReceived => {
-  //     console.log(dataReceived);
-  //   });
-  // }
+  componentDidMount() {
+    FirebaseService.getDataList('meeting', dataReceived => {
+      console.log(dataReceived);
+    });
+  }
 
   generateMeetingId = length => {
     let result = '';
@@ -35,8 +35,9 @@ class App extends Component {
     if (this.state.meetingName) {
       const code = this.generateMeetingId(4);
 
-      const newid = FirebaseService.pushData('meeting', {
-        code,
+      const newid = FirebaseService.set(`meeting/${code}`, {
+        name: 'Teste',
+        questions: [],
       });
 
       console.log(newid);

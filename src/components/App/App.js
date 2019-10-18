@@ -8,6 +8,8 @@ class App extends Component {
   state = {
     meetingName: '',
     meetingNameError: false,
+    makeQuestion: '',
+    makeQuestionError: false,
   };
 
   componentDidMount() {
@@ -46,8 +48,22 @@ class App extends Component {
     }
   };
 
+  makeQuestion = () => {
+    this.setState({
+      makeQuestionError: !this.state.makeQuestion,
+    });
+
+    if (this.state.makeQuestion) {
+      this.props.history.push(`/question/${this.state.makeQuestion}`);
+    }
+  };
+
   meetingNameChange = event => {
     this.setState({ meetingName: event.target.value });
+  };
+
+  makeQuestionChange = event => {
+    this.setState({ makeQuestion: event.target.value });
   };
 
   render() {
@@ -61,16 +77,21 @@ class App extends Component {
                   Acesse uma reunião
                 </label>
                 <input
-                  className='shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
+                  value={this.state.makeQuestion}
+                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                    this.state.makeQuestionError ? 'border-red-500' : ''
+                  }`}
                   id='name'
                   type='text'
                   placeholder='Digite seu código'
+                  onChange={this.makeQuestionChange}
                 />
               </div>
               <div className='flex items-center justify-between'>
                 <button
                   className='bg-orange-400 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline'
                   type='button'
+                  onClick={this.makeQuestion}
                 >
                   Acessar
                 </button>

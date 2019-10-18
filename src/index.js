@@ -7,6 +7,7 @@ import './css/tailwind.css';
 
 import App from './components/App/App';
 import NewMeeting from './components/NewMeeting/NewMeeting';
+import MakeQuestion from './components/MakeQuestion/MakeQuestion';
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
@@ -45,6 +46,9 @@ ReactDOM.render(
         </Route> */}
         <Route path='/meeting/:code'>
           <NewMeeting />
+        </Route>
+        <Route path='/question/:code'>
+          <MakeQuestion />
         </Route>
         <Route path='/'>
           <App />

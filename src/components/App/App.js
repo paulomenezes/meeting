@@ -6,16 +6,22 @@ import './App.css';
 
 class App extends Component {
   state = {
+    name: '',
     meetingName: '',
-    meetingNameError: false,
     makeQuestion: '',
+    nameError: false,
+    meetingNameError: false,
     makeQuestionError: false,
+    meetingDoesNotExist: false,
   };
 
   componentDidMount() {
-    FirebaseService.getDataList('meeting', dataReceived => {
-      console.log(dataReceived);
-    });
+    const name = localStorage.getItem('name');
+    if (name) {
+      this.setState({
+        name,
+      });
+    }
   }
 
   generateMeetingId = length => {
@@ -37,12 +43,10 @@ class App extends Component {
     if (this.state.meetingName) {
       const code = this.generateMeetingId(4);
 
-      const newid = FirebaseService.set(`meeting/${code}`, {
-        name: 'Teste',
+      FirebaseService.set(`meeting/${code}`, {
+        name: this.state.meetingName,
         questions: [],
       });
-
-      console.log(newid);
 
       this.props.history.push(`/meeting/${code}`);
     }
@@ -50,28 +54,61 @@ class App extends Component {
 
   makeQuestion = () => {
     this.setState({
+      nameError: !this.state.name,
       makeQuestionError: !this.state.makeQuestion,
+      meetingDoesNotExist: false,
     });
 
-    if (this.state.makeQuestion) {
-      this.props.history.push(`/question/${this.state.makeQuestion}`);
+    if (this.state.makeQuestion && this.state.name) {
+      localStorage.setItem('name', this.state.name);
+
+      FirebaseService.ref(`meeting/${this.state.makeQuestion}`).once('value', snapshot => {
+        if (snapshot.exists()) {
+          this.props.history.push(`/question/${this.state.makeQuestion}`);
+        } else {
+          this.setState({ meetingDoesNotExist: true });
+        }
+      });
     }
   };
 
   meetingNameChange = event => {
-    this.setState({ meetingName: event.target.value });
+    this.setState({ meetingNameError: false, meetingName: event.target.value });
   };
 
   makeQuestionChange = event => {
-    this.setState({ makeQuestion: event.target.value });
+    this.setState({ makeQuestionError: false, makeQuestion: event.target.value });
+  };
+
+  nameChange = event => {
+    this.setState({ nameError: false, name: event.target.value });
+  };
+
+  toInputUppercase = event => {
+    event.target.value = ('' + event.target.value).toUpperCase();
   };
 
   render() {
     return (
       <div>
         <div className='container mx-auto'>
-          <div className='w-1/2 mx-auto'>
+          <div className='md:w-2/3 lg:w-1/2 mx-4 md:mx-auto'>
             <form className='bg-white shadow-md rounded px-8 pt-6 pb-8'>
+              <div className='mb-4'>
+                <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor='name'>
+                  Digite seu nome
+                </label>
+                <input
+                  value={this.state.name}
+                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                    this.state.nameError ? 'border-red-500' : ''
+                  }`}
+                  id='name'
+                  type='text'
+                  placeholder='Digite seu nome'
+                  onChange={this.nameChange}
+                />
+              </div>
               <div className='mb-4'>
                 <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor='name'>
                   Acesse uma reunião
@@ -85,6 +122,7 @@ class App extends Component {
                   type='text'
                   placeholder='Digite seu código'
                   onChange={this.makeQuestionChange}
+                  onInput={this.toInputUppercase}
                 />
               </div>
               <div className='flex items-center justify-between'>
@@ -96,10 +134,11 @@ class App extends Component {
                   Acessar
                 </button>
               </div>
+              {this.state.meetingDoesNotExist && <div>Reunião não existe</div>}
             </form>
           </div>
           <p className='text-center text-gray-500 text-xs my-4'>ou</p>
-          <div className='w-1/2 mx-auto'>
+          <div className='md:w-2/3 lg:w-1/2 mx-4 md:mx-auto'>
             <form className='bg-white shadow-md rounded px-8 pt-6 pb-8'>
               <div className='mb-4'>
                 <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor='name'>
